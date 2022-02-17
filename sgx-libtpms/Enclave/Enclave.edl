@@ -1,0 +1,50 @@
+enclave {
+    include "time.h"
+    include "tpm_types.h"
+    include "enclave_tpm_types.h"    
+    include "openssl/ossl_typ.h"
+    include "ssl_enclave_types.h"
+    from "sgx_tstdc.edl" import *;
+    from "sgx_tprotected_fs.edl" import *;
+
+    trusted {
+        public TPM_RESULT ecall_tpmlib_register_callbacks(uint32_t cbs_notused);
+	public TPM_RESULT ecall_TPMLIB_ChooseTPMVersion(enum TPMLIB_TPMVersion ver);
+	public void ecall_TPMLIB_Terminate(void);
+
+	public TPM_RESULT ecall_TPMLIB_Process([in] unsigned char **respbuffer, [out] uint32_t *resp_size,
+                          [in] uint32_t *respbufsize,
+		          [in,size=command_size] unsigned char *command, uint32_t command_size);
+
+	public uint32_t ecall_TPMLIB_SetBufferSize(uint32_t wanted_size,
+                              [in] uint32_t *min_size,
+                              [in] uint32_t *max_size);
+	public TPM_RESULT ecall_TPM_IO_TpmEstablished_Get([in] TPM_BOOL *tpmEstablished);
+	public TPM_RESULT ecall_TPM_IO_Hash_Start(void);
+	public TPM_RESULT ecall_TPM_IO_Hash_End(void);
+	public TPM_RESULT ecall_TPMLIB_CancelCommand(void);
+	public char *ecall_TPMLIB_GetInfo(enum TPMLIB_InfoFlags flags);
+	public TPM_RESULT ecall_TPM_IO_Hash_Data([in] const unsigned char *data, uint32_t data_length);
+	public TPM_RESULT ecall_TPM_IO_TpmEstablished_Reset(void);
+        public void ecall_TPMLIB_SetDebugFD(int fd);
+	public void ecall_TPMLIB_SetDebugLevel(unsigned level);
+	public TPM_RESULT ecall_TPMLIB_SetDebugPrefix([in] const char *prefix);
+	public TPM_RESULT ecall_TPMLIB_GetTPMProperty(enum TPMLIB_TPMProperty prop, [out] int *result);
+        public TPM_RESULT ecall_TPMLIB_MainInit(void);
+        public TPM_RESULT ecall_TPMLIB_VolatileAll_Store_Size([out] uint32_t *buflen);
+        public TPM_RESULT ecall_TPMLIB_VolatileAll_Store_ecall([out, size=length] unsigned char *buffer, uint32_t length);
+        public TPM_RESULT ecall_TPMLIB_SetState(enum TPMLIB_StateType st,
+                           [in, size=buflen] const unsigned char *buffer, uint32_t buflen);
+    };
+
+    untrusted {
+        int ocall_clock_gettime(clockid_t clk_id, [out] struct timespec *tp);
+	TPM_RESULT ocall_SWTPM_NVRAM_Init(void);
+	TPM_RESULT ocall_SWTPM_NVRAM_LoadData([out, size=length]unsigned char *data, uint32_t length, uint32_t tpm_number, [in, string]const char *name);
+	TPM_RESULT ocall_SWTPM_NVRAM_DataSize([out]uint32_t *length, uint32_t tpm_number, [in, string]const char *name);
+	TPM_RESULT ocall_SWTPM_NVRAM_StoreData([in, size=length]const unsigned char *data, uint32_t length, uint32_t tpm_number, [in, string]const char *name);
+	TPM_RESULT ocall_SWTPM_NVRAM_DeleteName(uint32_t tpm_number, [in, string]const char *name, TPM_BOOL mustExist);
+	TPM_RESULT ocall_SWTPM_IO_Init(void);
+	TPM_RESULT ocall_mainloop_cb_get_locality([out]TPM_MODIFIER_INDICATOR *loc, uint32_t tpmnum);
+    };
+};
