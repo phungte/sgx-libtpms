@@ -5,3 +5,4 @@ set -ex
 ./autogen.sh
 make
 (cd sgx-libtpms; make)
+(cd sgx-libtpms; sudo make install)

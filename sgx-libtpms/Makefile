@@ -242,6 +242,9 @@ genkey: Enclave/Enclave_private.pem
 Enclave/Enclave_private.pem:
 	openssl genrsa -out Enclave/Enclave_private.pem -3 3072
 
+install: all
+	install -c -m 755 libenclave_tpms.signed.so /usr/local/lib
+
 ######### clean up ########
 .PHONY: clean
 
